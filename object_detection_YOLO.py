@@ -3,8 +3,8 @@ import cv2
 import math 
 # start webcam
 cap = cv2.VideoCapture(0)
-cap.set(3, 640)
-cap.set(4, 480)
+cap.set(3, 1280)
+cap.set(4, 960)
 
 # model
 model = YOLO("yolo-Weights/yolov8n.pt")
@@ -17,15 +17,14 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
               "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
               "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli",
               "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed",
-              "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone",
+              "diningtable", "toilet", "monitor", "laptop", "mouse", "remote", "keyboard", "cell phone",
               "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors",
-              "teddy bear", "hair drier", "toothbrush"
               ]
 
 
 while True:
     success, img = cap.read()
-    results = model(img, stream=True)
+    results = model(img, stream=False)
 
     # coordinates
     for r in results:
@@ -54,7 +53,9 @@ while True:
             color = (255, 0, 0)
             thickness = 2
 
-            cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
+            msg = classNames[cls] + ' ' + str(confidence)
+
+            cv2.putText(img, msg, org, font, fontScale, color, thickness)
 
     cv2.imshow('Webcam', img)
     if cv2.waitKey(1) == ord('q'):
