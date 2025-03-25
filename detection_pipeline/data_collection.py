@@ -7,8 +7,9 @@ import uuid     # To create nique uniform identifier for collected images
 import cv2      # For access camera sensors for image data collection
 
 DIR_PATH = os.getcwd()
-IMG_PATH = os.path.join(DIR_PATH, 'data_raw')
-number_images = 30
+IMG_RAW_PATH = os.path.join(DIR_PATH, 'data_raw\\images')
+print(IMG_RAW_PATH)
+number_images = 10
 
 
 cap = cv2.VideoCapture(0)
@@ -23,7 +24,7 @@ for imgnum in range(number_images):
         print("There are some errors in the capture process")
         break
 
-    imgname = os.path.join(IMG_PATH,f'{str(uuid.uuid1())}.jpg')
+    imgname = os.path.join(IMG_RAW_PATH,f'{str(uuid.uuid1())}.jpg')
     cv2.imwrite(imgname, frame)
     cv2.imshow('Frame', frame)
     time.sleep(1.0)
@@ -33,3 +34,5 @@ for imgnum in range(number_images):
 
 cap.release()
 cv2.destroyAllWindows()
+
+# After collecting the images, you can run labelme from the terminal window to annotate the images
