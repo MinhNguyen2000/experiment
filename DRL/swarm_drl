@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class EntitySpawner:
+    def __init__(self, n, space_size=(100, 100), seed=None):
+        """
+        Initialize the spawner.
+
+        Args:
+            n (int): Number of total entities to spawn (must be at least 2).
+            space_size (tuple): The width and height of the 2D space.
+            seed (int): Optional seed for reproducibility.
+        """
+        if n < 2:
+            raise ValueError("Must spawn at least 2 entities.")
+        
+        self.n = n
+        self.space_size = space_size
+        self.entities = []
+        self.seed = seed
+        if seed is not None:
+            np.random.seed(seed)
+
+        self._spawn_entities()
+
+    def _spawn_entities(self):
+        """Spawn the entities with random positions."""
+        positions = np.random.rand(self.n, 2) * (np.subtract(self.space_size, (5,5)))
+        indices = np.random.permutation(self.n)
+
+        self.entities = []
+        for i in range(self.n):
+            if i == indices[0]:
+                role = 'target'
+                radius = 3
+            elif i == indices[1]:
+                role = 'agent'
+                radius = 3
+            else:
+                role = 'stationary'
+                radius = np.random.choice([3,5,7])
+            self.entities.append({
+                'id': i,
+                'role': role,
+                'position': positions[i],
+                'radius': radius
+            })
+
+    def plot_entities(self):
+        """Plot the entities on a 2D graph with circles showing their radius."""
+        fig, ax = plt.subplots(figsize=(8, 8))
+
+        for entity in self.entities:
+            x, y = entity['position']
+            r = entity['radius']
+            role = entity['role']
+
+            if role == 'target':
+                color = 'red'
+                label = 'Target'
+            elif role == 'agent':
+                color = 'blue'
+                label = 'Agent'
+            else:
+                color = 'green'
+                label = 'Stationary'
+
+            # Draw the center point
+            ax.plot(x, y, 'o', color=color, alpha = 0.1, label=label)
+
+            # Draw the radius circle
+            circle = plt.Circle((x, y), r, color=color, alpha=0.8)
+            ax.add_patch(circle)
+
+        ax.set_xlim(0, self.space_size[0])
+        ax.set_ylim(0, self.space_size[1])
+        ax.set_aspect('equal', adjustable='box')
+        ax.grid(True)
+        ax.set_title("2D Top-Down View of Entities with Radius")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.legend()
+        ax.grid(False)
+        plt.show()
+
+
+entitySpawner = EntitySpawner(5)
+entitySpawner.plot_entities()
