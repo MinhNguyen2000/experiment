@@ -47,6 +47,20 @@ def plot_grid(grid_size, Q, title="Frozen Lake"):
             ax.text(col + 0.5, row + 0.8, f"{Q[2,row*grid_size+col]:.3f}", fontsize=8, ha='center', va='center')
             ax.text(col + 0.05, row + 0.5, f"{Q[3,row*grid_size+col]:.3f}", fontsize=8, rotation=-90, ha='left', va='center')
 
+            # Visualize greedy policy
+            state = row * grid_size + col
+            
+            # Action directions (for arrows) - [up, right, down, left]
+            arrow_directions = [(0, -0.05), (0.05, 0), (0, 0.05), (-0.05, 0)]
+            arrow_colors = ['red', 'red', 'red', 'red']
+
+            # Greedy policy arrow (only if not terminal state)
+            if (row, col) not in holes and (row, col) != goal:
+                best_action = np.argmax(Q[:, state])
+                dx, dy = arrow_directions[best_action]
+                ax.arrow(col + 0.5, row + 0.5, dx, dy, 
+                        head_width=0.2, head_length=0.2, 
+                        fc=arrow_colors[best_action], ec=arrow_colors[best_action])
 
     plt.title(title)
     plt.show()
