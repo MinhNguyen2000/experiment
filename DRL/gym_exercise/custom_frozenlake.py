@@ -12,6 +12,23 @@ from gymnasium.envs.registration import register
 
 
 class CustomFrozenLakeEnv(FrozenLakeEnv):
+
+    def step(self, action):
+        obs, _, terminated, truncated, info = super().step(action)
+        
+        # Get the current state's tile type
+        current_tile = self.desc.flatten()[obs]
+        
+        # Custom reward structure
+        if current_tile == b'G':
+            reward = 10
+        elif current_tile == b'H':
+            reward = -2
+        else:
+            reward = 0  # Small penalty for each step
+        
+        return obs, reward, terminated, truncated, info
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed, options=options)
 
