@@ -9,11 +9,15 @@ holes = [(1, 1), (1, 3), (2, 3), (3, 0)]  # Bad states
 goal = (3, 3)  # Terminal state
 start = (0, 0)
 
-# Initialize value tables
-V = {(i, j): 0 for i in range(grid_size) for j in range(grid_size)}
-Q = np.random.rand(n_actions,n_states)
 
-def plot_grid(Q, title="Frozen Lake"):
+def plot_grid(grid_size, Q, title="Frozen Lake"):
+    ''' Function to plot a simple square GridWorld with the state-action values in each square 
+    
+    Inputs: 
+    - grid_size: the number of square in each edge
+    - Q: the array of state-action values, where the rows represent the action-space and the columns represents the state-space.
+         the array has size (n_actions x n_states)
+    '''
     fig, ax = plt.subplots()
     ax.set_xticks(np.arange(grid_size+1))
     ax.set_yticks(np.arange(grid_size+1))
