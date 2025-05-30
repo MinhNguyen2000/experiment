@@ -1,0 +1,26 @@
+{
+  "parameters": {
+    "model_id": "v0",
+    "lr": 0.01,
+    "gamma": 0.95,
+    "epsilon_decay": 5000,
+    "batch_size": 32,
+    "buffer_size": 5000,
+    "target_update_freq": 1000
+  },
+  "val_history": {
+    "4925": [
+      482.0,
+      132.22
+    ],
+    "4930": [
+      462.0,
+      235.05
+    ],
+    "4935": [
+      500.0,
+      164.34
+    ]
+  },
+  "test_result": 232.668
+}
