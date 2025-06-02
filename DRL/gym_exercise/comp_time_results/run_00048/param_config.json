@@ -1,0 +1,24 @@
+{
+  "parameters": {
+    "OOP": true,
+    "CUDA": false,
+    "device": "NVIDIA T1000 8GB",
+    "model_id": "v0",
+    "lr": 0.0005,
+    "gamma": 0.95,
+    "epsilon_decay": 5000,
+    "batch_size": 32,
+    "buffer_size": 5000,
+    "target_update_freq": 1000
+  },
+  "runtime": 92.05752754211426,
+  "valtime": 0.5552043914794922,
+  "best_model_at": 4063,
+  "val_history": {
+    "4063": [
+      500.0,
+      92.34
+    ]
+  },
+  "test_result": 92.374
+}
