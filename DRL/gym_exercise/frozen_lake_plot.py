@@ -19,6 +19,9 @@ def plot_grid(grid_size, Q, title="Frozen Lake"):
          the array has size (n_actions x n_states)
     '''
     fig, ax = plt.subplots()
+    fig_size = 8
+    font_size = 10
+    fig.set_figheight(fig_size); fig.set_figwidth(fig_size)
     ax.set_xticks(np.arange(grid_size+1))
     ax.set_yticks(np.arange(grid_size+1))
     ax.grid(True)
@@ -42,16 +45,17 @@ def plot_grid(grid_size, Q, title="Frozen Lake"):
             
             # Text: State value (center) and Q-values (directions)
             # ax.text(col + 0.5, row + 0.5, f"{V[(row, col)]:.2f}", ha='center', va='center')
-            ax.text(col + 0.5, row + 0.2, f"{Q[0,row*grid_size+col]:.3f}", fontsize=8, ha='center', va='center')
-            ax.text(col + 0.95, row + 0.5, f"{Q[1,row*grid_size+col]:.3f}", fontsize=8, rotation=90, ha='right', va='center')            
-            ax.text(col + 0.5, row + 0.8, f"{Q[2,row*grid_size+col]:.3f}", fontsize=8, ha='center', va='center')
-            ax.text(col + 0.05, row + 0.5, f"{Q[3,row*grid_size+col]:.3f}", fontsize=8, rotation=-90, ha='left', va='center')
+            ax.text(col + 0.5, row + 0.2, f"{Q[3,row*grid_size+col]:.3f}", fontsize=font_size, ha='center', va='center')
+            ax.text(col + 0.95, row + 0.5, f"{Q[2,row*grid_size+col]:.3f}", fontsize=font_size, rotation=90, ha='right', va='center')            
+            ax.text(col + 0.5, row + 0.8, f"{Q[1,row*grid_size+col]:.3f}", fontsize=font_size, ha='center', va='center')
+            ax.text(col + 0.05, row + 0.5, f"{Q[0,row*grid_size+col]:.3f}", fontsize=font_size, rotation=-90, ha='left', va='center')
 
             # Visualize greedy policy
             state = row * grid_size + col
             
             # Action directions (for arrows) - [up, right, down, left]
             arrow_directions = [(0, -0.05), (0.05, 0), (0, 0.05), (-0.05, 0)]
+            arrow_directions.reverse()
             arrow_colors = ['red', 'red', 'red', 'red']
 
             # Greedy policy arrow (only if not terminal state)

@@ -21,12 +21,15 @@ class CustomFrozenLakeEnv(FrozenLakeEnv):
         
         # Custom reward structure
         if current_tile == b'G':
-            reward = 10
+            reward = 1
         elif current_tile == b'H':
-            reward = -2
+            reward = -1
         else:
-            reward = -0.2  # Small penalty for each step
+            reward = -0.001  # Small penalty for each step
         
+        if truncated:
+            reward = -1
+
         return obs, reward, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
