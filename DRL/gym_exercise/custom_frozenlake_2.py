@@ -25,39 +25,13 @@ class CustomFrozenLakeEnv(FrozenLakeEnv):
         elif current_tile == b'H':
             reward = -2
         else:
-            reward = -0.2  # Small penalty for each step
+            reward = -0.1  # Small penalty for each step
         
         return obs, reward, terminated, truncated, info
 
-    def reset(self, seed=None, options=None):
-        super().reset(seed=seed, options=options)
-
-        self.nS = self.nrow * self.ncol
-        
-
-        # Build once outside the loop
-        terminal_states = set(
-            s for s in range(self.nS)
-            if self.desc.flat[s] in (b'H', b'G')
-        )
-
-        # Sample non-terminal states
-        while True:
-            # self.s = categorical_sample(self.initial_state_distrib, self.np_random)
-            self.s = self.np_random.choice(self.nS)
-            if self.s not in terminal_states: 
-                break
-        
-        self.lastaction = None
-
-        if self.render_mode == "human":
-            self.render()
-
-        return int(self.s), {"prob": 1}
-
 register(
-    id="CustomFrozenLake-v0",
-    entry_point="custom_frozenlake:CustomFrozenLakeEnv",
+    id="CustomFrozenLake-v1",
+    entry_point="custom_frozenlake_2:CustomFrozenLakeEnv",
     kwargs={"map_name": "4x4", "is_slippery": True},
 )
 
