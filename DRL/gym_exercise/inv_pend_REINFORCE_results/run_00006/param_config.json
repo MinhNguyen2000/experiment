@@ -1,0 +1,15 @@
+{
+  "parameters": {
+    "OOP": true,
+    "CUDA": false,
+    "device": "NVIDIA GeForce RTX 4060",
+    "model_id": "v0",
+    "lr": 0.0005,
+    "gamma": 0.98
+  },
+  "runtime": 52.95506405830383,
+  "valtime": 0,
+  "best_model_at": null,
+  "val_history": {},
+  "test_result": 21.51
+}
