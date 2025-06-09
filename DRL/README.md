@@ -17,5 +17,6 @@ This folder contains customized code with rudimentary implementation of classica
 
 ## 2. Requirements
 Setup a virtual environment (venv) and install the following dependencies in the venv
-'pip install '
+'pip install gymnasium'
 
+Installing pytorch (with or without CUDA) - [PyTorch documentation](https://pytorch.org/get-started/locally/)
