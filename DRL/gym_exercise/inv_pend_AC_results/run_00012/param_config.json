@@ -1,0 +1,16 @@
+{
+  "parameters": {
+    "OOP": true,
+    "CUDA": false,
+    "device": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "model_name": "AC_MLP_v0",
+    "alpha": 0.05,
+    "beta": 0.05,
+    "gamma": 0.98
+  },
+  "runtime": 19.646067142486572,
+  "valtime": 0,
+  "best_model_at": null,
+  "val_history": {},
+  "test_result": 9.304
+}
