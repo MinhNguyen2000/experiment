@@ -1,0 +1,19 @@
+{
+  "parameters": {
+    "OOP": true,
+    "CUDA": false,
+    "device": "NVIDIA T1000 8GB",
+    "model_name": "AC_MLP_v0",
+    "alpha": 0.0005,
+    "beta": 0.001,
+    "gamma": 0.98
+  },
+  "runtime": 484.99919056892395,
+  "valtime": 0,
+  "best_model_at": null,
+  "val_history": {},
+  "test_result": [
+    9.288,
+    0.7444221441207365
+  ]
+}
