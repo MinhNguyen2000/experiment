@@ -4,8 +4,16 @@
 	"name": "Anaconda (Python 3)",
 	"build": { 
 		"context": "..",
-		"dockerfile": "Dockerfile"
-	}
+		"dockerfile": "Dockerfile",
+	},
+	"runArgs": [
+		"--gpus=all",
+		"--privileged",
+		"--network=host",
+		"--env=DISPLAY",
+		"-v", "/tmp/.X11-unix:/tmp/.X11-unix",
+    	"-v", "/home/controlslab/.Xauthority:/root/.Xauthority"
+	]
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

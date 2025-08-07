@@ -20,7 +20,8 @@ RUN pip install torch \
     matplotlib \
     opencv-python==4.9.0.80
 
-RUN pip install gymnasium[classic-control]
+RUN pip install gymnasium[classic-control] \
+    gymnasium[mujoco]
 
 RUN conda init
 
