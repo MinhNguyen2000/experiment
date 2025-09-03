@@ -7,7 +7,7 @@
 		"dockerfile": "Dockerfile",
 	},
 	"runArgs": [
-		"--gpus=all",
+		// "--gpus=all",
 		"--privileged",
 		"--network=host",
 		"--env=DISPLAY",
