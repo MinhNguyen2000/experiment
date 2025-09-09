@@ -5,7 +5,7 @@ class SwingUpInvPenWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
         core = self.env.unwrapped
-        self.x_threshold = 2
+        self.x_threshold = 0.9
         self.observation_space
 
     def reset(self, **kwargs):
@@ -36,7 +36,6 @@ class SwingUpInvPenWrapper(gym.Wrapper):
 
         # --- unpack state
         x, theta, x_dot, theta_dot = core._get_obs()
-        print()
 
         # --- termination when cartpos out of bound
         term = bool(abs(x) > self.x_threshold)
