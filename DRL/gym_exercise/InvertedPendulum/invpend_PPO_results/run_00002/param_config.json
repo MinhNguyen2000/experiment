@@ -1,0 +1,44 @@
+{
+  "parameters": {
+    "OOP": true,
+    "CUDA": false,
+    "device": "NVIDIA T1000 8GB",
+    "model_name": "PPO_MLP_v0",
+    "alpha": 0.0005,
+    "beta": 0.0005,
+    "gamma": 0.99,
+    "eps": 0.1,
+    "buffer_size": 2048,
+    "batch_size": 64,
+    "epoch": 10
+  },
+  "runtime": 43.66088342666626,
+  "valtime": 12.957719326019287,
+  "best_model_at": 38,
+  "val_history": {
+    "34": [
+      1000.0,
+      1000
+    ],
+    "35": [
+      1000.0,
+      1000
+    ],
+    "36": [
+      1000.0,
+      1000
+    ],
+    "37": [
+      1000.0,
+      1000
+    ],
+    "38": [
+      1000.0,
+      1000
+    ]
+  },
+  "test_result": [
+    1000,
+    0.0
+  ]
+}

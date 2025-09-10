@@ -8,7 +8,7 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         self.x_threshold = 2
         self.observation_space
 
-    def reset(self, **kwargs):
+    def reset(self, train = True, **kwargs, ):
         
         # --- reset the environment and unwrap the TimeLimit wrapper
         obs, info = self.env.reset(**kwargs)
@@ -16,7 +16,7 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         core = self.env.unwrapped
 
         # # --- set pendulum down initial position + noise
-        if core.np_random.random() > 0.8:   # some probability to start from pendulum up
+        if train and core.np_random.random() > 0.8:   # some probability to start from pendulum up
             qpos = np.array([0.0, 0.0]) + core.np_random.normal(0, 0.1, size=2)
         else:
             qpos = np.array([0.0, np.pi]) + core.np_random.normal(0, 0.1, size=2)
