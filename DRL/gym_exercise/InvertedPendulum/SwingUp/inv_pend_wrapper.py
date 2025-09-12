@@ -40,10 +40,12 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         term = bool(abs(x) > self.x_threshold)
 
         # reward_theta is 1 when theta is 0 or 2pi, 0 if between 90 and 270:
-        reward_theta = max(0, np.cos(theta))
+        # reward_theta = max(0, np.cos(theta))
+        reward_theta = max(0, np.cos(theta/2))
 
         # reward_x is 0 when cart is at the edge of the screen, 1 when it's in the center:
-        reward_x = np.cos((x / self.x_threshold) * (np.pi / 2.0))
+        # reward_x = np.cos((x / self.x_threshold) * (np.pi / 2.0))
+        reward_x = np.cos(np.pi*(x / self.x_threshold))
 
         # reward between [0, 1]:
         rew = reward_theta * reward_x
