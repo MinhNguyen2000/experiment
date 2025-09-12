@@ -17,7 +17,7 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         core = self.env.unwrapped
 
         # # --- set pendulum down initial position + noise
-        if self.train and core.np_random.random() > 0.9:   # some probability to start from pendulum up
+        if self.train and core.np_random.random() > 0.8:   # some probability to start from pendulum up
             qpos = np.array([0.0, 0.0]) + core.np_random.normal(0, 0.1, size=2)
         else:
             qpos = np.array([0.0, np.pi]) + core.np_random.normal(0, 0.1, size=2)
