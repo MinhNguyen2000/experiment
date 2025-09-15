@@ -17,7 +17,7 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         core = self.env.unwrapped
 
         # # --- set pendulum down initial position + noise
-        if self.train and core.np_random.random() > 0.8:   # some probability to start from pendulum up
+        if self.train and core.np_random.random() > 0.9:   # some probability to start from pendulum up
             qpos = np.array([0.0, 0.0]) + core.np_random.normal(0, 0.1, size=2)
         else:
             qpos = np.array([0.0, np.pi]) + core.np_random.normal(0, 0.1, size=2)
@@ -39,6 +39,14 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         # --- termination when cartpos out of bound
         term = bool(abs(x) > self.x_threshold)
 
+        # --- reward engineering
+        rew = 0
+        # rew += 5 if abs(theta) < (np.pi/2) else 0
+        if abs(theta) < (np.pi/2):
+            if abs(theta) < 0.1:
+                rew += 10
+            else:
+                rew += 2
         
         # --- reward shaping
         # reward_theta is 1 when theta is 0 or 2pi, 0 if between 90 and 270:
@@ -50,6 +58,6 @@ class SwingUpInvPenWrapper(gym.Wrapper):
         reward_x = 0.5*np.cos(np.pi*(x / self.x_threshold)+1)
 
         # reward between [0, 1]:
-        rew = reward_theta * reward_x
+        rew += reward_theta * reward_x
 
         return obs, rew, term, trunc, info
