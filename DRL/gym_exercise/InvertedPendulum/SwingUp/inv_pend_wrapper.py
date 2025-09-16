@@ -55,7 +55,7 @@ class SwingUpInvPenWrapper(gym.Wrapper):
 
         # reward_x is 0 when cart is at the edge of the screen, 1 when it's in the center:
         # reward_x = np.cos((x / self.x_threshold) * (np.pi / 2.0))
-        reward_x = np.cos((np.pi*(x) / self.x_threshold) + 1)/2
+        reward_x = (np.cos(np.pi*(x) / self.x_threshold) + 1)/2
 
         # reward between [0, 1]:
         rew += reward_theta * reward_x
