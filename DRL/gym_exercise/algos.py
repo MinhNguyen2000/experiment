@@ -497,7 +497,7 @@ class TD3():
                 if self.reward_hist[eps] >= self.pass_score:
 
                     # TODO - time the evaluation process
-                    eval_reward, eval_stdev = self.eval_policy(self.env_val, 20, verbose = False)
+                    eval_reward, eval_stdev = self.eval_policy(self.env_val, 10, verbose = False)
                     coeff_var = eval_stdev / eval_reward
 
                     self.val_hist[eps] = f"{self.reward_hist[eps]:5.3f}, {eval_reward:5.3f}"
