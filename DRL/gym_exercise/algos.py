@@ -99,6 +99,7 @@ class TD3():
             buffer_init: int,   # number of prefilled samples before training
             batch_size: int,    # number of samples used in each current critic update
             update_f: int,      # update frequency of online actor + offline target networks
+            update_step: int,   # number of gradient descent steps/updates of the policy & target networks
             iter: int,          # number of training iterations
             train_crit = dict(pass_limit=5, pass_score=975, coeff_var_limit=0.1),
             result_folder: str = 'invpend_TD3_results',
@@ -116,6 +117,7 @@ class TD3():
 
         self.buffer_size, self.buffer_init, self.batch_size = buffer_size, buffer_init, batch_size
         self.update_f = update_f
+        self.update_step = update_step
         self.train_iter = iter
         self.pass_limit = train_crit['pass_limit']
         self.pass_score = train_crit['pass_score']
@@ -204,7 +206,7 @@ class TD3():
         polyak_args = fr"$\tau_c$={self.tau_c} | $\tau_a$={self.tau_a} | "
         buffer_args = fr"$n_{{buff}}$={self.buffer_size} | $n_{{i}}$={self.buffer_init} | "
         misc_args = fr"$f_{{update}}$={self.update_f} | {self.train_iter} iter"
-        title = lr_args + polyak_args + buffer_args + misc_args
+        title = device_info + lr_args + polyak_args + buffer_args + misc_args
 
         plt.figure(figsize=(20,6))
         plt.plot(episodes, history[:n_episodes], color = "blue")
@@ -403,7 +405,7 @@ class TD3():
         polyak_args = f"{self.tau_c}_{self.tau_a}_"
         policysmooth_args = f"{self.sigma}_{self.clip}_"
         buffer_args = f"{self.buffer_size}_{self.buffer_init}_{self.batch_size}_"
-        misc_args = f"{self.update_f}_{self.train_iter}_"
+        misc_args = f"{self.update_f}_{self.update_step}_{self.train_iter}_"
         earlystop_args = f"{self.pass_limit}_{self.pass_score}_{self.coeff_var_limit}_"
 
         hyperparam_codified = "TD3_"+ device_info + lr_args + polyak_args + policysmooth_args + buffer_args + misc_args + earlystop_args
@@ -431,6 +433,7 @@ class TD3():
             'buffer_init':          self.buffer_init,
             'batch_size':           self.batch_size,
             'update_f':             self.update_f,
+            'update_step':          self.update_step,
             'train_iter':           self.train_iter,
             'pass_count':           self.pass_limit,
             'pass_score':           self.pass_score,
@@ -471,7 +474,7 @@ class TD3():
         current_eps_reward = 0
 
         pass_count = 0
-        best_eval_reward = self.pass_score
+        best_eval_reward = self.pass_score-1.5
         best_coeffvar = self.coeff_var_limit
 
 
@@ -525,7 +528,7 @@ class TD3():
                     #     pass_count = 0
 
                     # if (eval_reward  >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
-                    if (eval_reward  >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
+                    if (eval_reward >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
                         pass_count += 1
 
                         # if coeff_var <= best_coeffvar:
@@ -589,21 +592,22 @@ class TD3():
                 self.critic1_optim.zero_grad(); loss_q1.backward(); self.critic1_optim.step()
                 self.critic2_optim.zero_grad(); loss_q2.backward(); self.critic2_optim.step()
 
-            # --- train online actor, offline critics, and offline actor
-            if step % self.update_f == 0:
-                # online actor update -E[Q1(s, π(s))]
-                a = self.actor(obss)
-                loss_actor = -self.critic1(obss, a).mean()  
+                # --- train online actor, offline critics, and offline actor
+                if step % self.update_f == 0:
+                    for update in range(self.update_step):
+                        # online actor update -E[Q1(s, π(s))]
+                        a = self.actor(obss)
+                        loss_actor = -self.critic1(obss, a).mean()  
 
-                self.actor_optim.zero_grad()
-                loss_actor.backward()
-                self.actor_optim.step()
+                        self.actor_optim.zero_grad()
+                        loss_actor.backward()
+                        self.actor_optim.step()
 
-                # offline critic soft update
-                with torch.no_grad():
-                    self.soft_update(self.critic1, self.critic1_target, self.tau_c)
-                    self.soft_update(self.critic2, self.critic2_target, self.tau_c)
-                    self.soft_update(self.actor, self.actor_target, self.tau_a)
+                        # offline critic soft update
+                        with torch.no_grad():
+                            self.soft_update(self.critic1, self.critic1_target, self.tau_c)
+                            self.soft_update(self.critic2, self.critic2_target, self.tau_c)
+                            self.soft_update(self.actor, self.actor_target, self.tau_a)
 
         print(msg)
         print(f'Best model episode {self.best_model_eps}')
