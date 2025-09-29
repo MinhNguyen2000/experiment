@@ -63,7 +63,9 @@ class Critic(nn.Module):
             self.layers.append(nn.Linear(prev_layer_size, layer_size))
             prev_layer_size = layer_size
 
-        self.layers.append(nn.Linear(prev_layer_size, self.act_dim))
+        # self.layers.append(nn.Linear(prev_layer_size, self.act_dim))
+        self.layers.append(nn.Linear(prev_layer_size, 1))
+
         if cuda_enabled: self.cuda()
 
     def forward(self, obs, act):
@@ -129,7 +131,7 @@ class TD3():
         # self.env_val = gym.make("InvertedPendulum-v5", render_mode="rgb_array")
 
         self.env = env
-        self.env_val = env
+        self.env_val = env 
         self.obs_space = self.env.observation_space.shape[0]
         self.act_space = self.env.action_space.shape[0]
         self.act_low = torch.as_tensor(self.env.action_space.low, dtype=torch.float32, device = self.device)
@@ -261,25 +263,25 @@ class TD3():
         # --- deterministic action
         with torch.no_grad():
             if not clip:    # pi_theta(s)
-                act_det = self.actor(obs)
+                act = self.actor(obs)
             else:           # pi_theta'(s')
-                act_det = self.actor_target(obs)
+                act = self.actor_target(obs)
 
         # --- external stochasticity (Gaussian noise and clipping)
-            noise = self.to_tensor(0)
             if train and self.sigma > 0.0:
-                noise = self.sigma * torch.randn_like(act_det)
+                noise = self.sigma * torch.randn_like(act)
             
                 if clip:    # clip the added Gaussian noise in policy smoothing regularization
                     noise = torch.clamp(noise, -self.clip, self.clip)
-            act = act_det + noise
+                act = act + noise
 
         # --- action clipping (env bounds)
         act = torch.clamp(act, self.actor.act_low, self.actor.act_high)
 
-        noise_logp = Normal(loc=0.0, scale=self.sigma).log_prob(noise)
+        
         if debug:
-            return act, act_det, noise, torch.exp(noise_logp)
+            noise_logp = Normal(loc=0.0, scale=self.sigma).log_prob(noise)
+            return act, noise, torch.exp(noise_logp)
         
         return act.cpu().numpy()
     
@@ -326,7 +328,7 @@ class TD3():
             this environment can be either the self.env_test or self.env_val environment
         n_episode_eval : int 
             the number of evaluation episodes
-        verbose : bool
+        verbose : bool  
             whether to print testing information (should be True only during testing)
 
         Return:
@@ -337,13 +339,13 @@ class TD3():
         reward_history = []
         with torch.no_grad():
             for i in range(n_iter_eval):
-                obs,_ = env.reset()
+                obs,_ = env.reset(seed=42+i)
                 done = False
                 eps_reward = 0
                 
                 while not done:
                     obs_tensor = self.to_tensor(obs)
-                    act = self.act(obs_tensor, train=False)
+                    act = self.act(obs_tensor, train=True)
                     nobs, rew, term, trunc, _ = env.step(act)
 
                     eps_reward += rew
@@ -399,10 +401,12 @@ class TD3():
         device_info = str(self.device) + "_"
         lr_args = f"{self.model_id}_{self.alpha1}_{self.alpha2}_{self.beta}_{self.gamma}_"
         polyak_args = f"{self.tau_c}_{self.tau_a}_"
-        buffer_args = f"{self.buffer_size}_{self.buffer_init}_"
-        misc_args = f"{self.update_f}_{self.train_iter}"
+        policysmooth_args = f"{self.sigma}_{self.clip}_"
+        buffer_args = f"{self.buffer_size}_{self.buffer_init}_{self.batch_size}_"
+        misc_args = f"{self.update_f}_{self.train_iter}_"
+        earlystop_args = f"{self.pass_limit}_{self.pass_score}_{self.coeff_var_limit}_"
 
-        hyperparam_codified = "TD3_"+ device_info + lr_args + polyak_args + buffer_args + misc_args
+        hyperparam_codified = "TD3_"+ device_info + lr_args + polyak_args + policysmooth_args + buffer_args + misc_args + earlystop_args
         hyperparam_codified_time = f"{timestamp}_" + hyperparam_codified
 
         data[name_codified] = hyperparam_codified_time
@@ -421,6 +425,8 @@ class TD3():
             'gamma':                self.gamma,
             'tau_c':                self.tau_c,
             'tau_a':                self.tau_a,
+            'sigma':                self.sigma,
+            'clip':                 self.clip,
             'buffer_size':          self.buffer_size,
             'buffer_init':          self.buffer_init,
             'batch_size':           self.batch_size,
@@ -447,7 +453,7 @@ class TD3():
             'optimizer_state_dict': self.actor_optim.state_dict(),
         }, self.model_path)
 
-    def train(self, early_stop:bool=True):
+    def train(self, early_stop:bool=True, verbose:bool=False):
         # --- create directory to store results
         self.run_num, self.hyperparam_config, self.save_path = self.create_directory()
 
@@ -458,12 +464,16 @@ class TD3():
         eps_step_count = 0              # episode length counter
         eps = 0                         # episode index
         
-        self.reward_hist = [0]          # monitor reward of episodes
+        self.reward_hist = []          # monitor reward of episodes
         self.val_hist = {}
         self.eps_hist = []              # monitor length of episdes
+        self.ins_reward_hist = []
+        current_eps_reward = 0
 
         pass_count = 0
+        best_eval_reward = self.pass_score
         best_coeffvar = self.coeff_var_limit
+
 
         # --- train
         # while train_term == False:        # train until convergence
@@ -479,39 +489,56 @@ class TD3():
             step += 1
 
             self.buffer.append((obs, act, rew, nobs, done))
+
+            eps_step_count += 1
+            current_eps_reward += rew                # accumulate episode reward
+            self.ins_reward_hist.append(rew)
             
             if not done:
                 obs = nobs
-                eps_step_count += 1
-                self.reward_hist[eps] += rew                # accumulate episode reward
             else:   # at the end of this rollout, do the following
-                # --- reset the observation
-                obs = self.env.reset()[0]
-
                 # --- accumulate the reward and add another index for the next rollout
-                self.reward_hist[eps] += rew
-                self.reward_hist.append(0)
+                self.reward_hist.append(current_eps_reward)
                 self.eps_hist.append(eps_step_count)
 
                 # --- policy evaluation at high eps_step_count
                 if self.reward_hist[eps] >= self.pass_score:
+                    
 
                     # TODO - time the evaluation process
                     eval_reward, eval_stdev = self.eval_policy(self.env_val, 10, verbose = False)
-                    coeff_var = eval_stdev / eval_reward
+                    coeff_var = np.abs(eval_stdev / eval_reward)
+                    
+                    if verbose: print(f"Good training at episode {eps:4d} with reward of {self.reward_hist[eps]:3.3f}. Evaluation results μ={eval_reward:6.3f}, σ={eval_stdev:6.3f}, CV={coeff_var:6.3f}")
+                    # self.val_hist[eps] = f"Train reward {self.reward_hist[eps]:6.3f}. Evaluation {eval_reward:6.3f}±{eval_stdev:6.3f}"
+                    
+                    # if (eval_reward  >= self.pass_score) and (coeff_var <= best_coeffvar):  # focus on reducing the coefficient of variation in policy evaluation
+                    #     best_coeffvar = coeff_var
+                    #     self.save_model()
+                    #     self.best_model_eps = eps
+                    #     msg = f"Training terminated due to episode limit, best model saved at episode {self.best_model_eps:5d} with evaluate reward ({eval_reward:6.3f},{eval_stdev:6.3f})"
+                    
+                    # # if (eval_reward  >= self.pass_score)  and (coeff_var < self.coeff_var_limit):
+                    # if coeff_var < self.coeff_var_limit:
+                    #     pass_count += 1
+                    # else:
+                    #     pass_count = 0
 
-                    self.val_hist[eps] = f"{self.reward_hist[eps]:5.3f}, {eval_reward:5.3f}"
-                    if coeff_var <= best_coeffvar:  # focus on reducing the coefficient of variation in policy evaluation
-                        best_coeffvar = coeff_var
-                        self.save_model()
-                        self.best_model_eps = eps
-                        msg = f"Training terminated due to episode limit, best model saved at episode {self.best_model_eps:5d} with evaluate reward ({eval_reward:6.3f},{eval_stdev:6.3f})"
-                    if coeff_var < self.coeff_var_limit:
+                    # if (eval_reward  >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
+                    if (eval_reward  >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
                         pass_count += 1
+
+                        # if coeff_var <= best_coeffvar:
+                        #     best_coeffvar = coeff_var
+                        if eval_reward >= best_eval_reward:
+                            best_eval_reward = eval_reward
+                            self.save_model()
+                            self.best_model_eps = eps
+                            msg = f"Training terminated due to episode limit, best model saved at episode {self.best_model_eps:5d} with evaluate reward ({eval_reward:6.3f},{eval_stdev:6.3f})"
                     else:
                         pass_count = 0
 
-                if early_stop:
+                if early_stop and eps >= 50:
                     # --- early termination if multiple consecutive eps pass
                     if pass_count >= self.pass_limit:
                         # self.save_model()
@@ -521,8 +548,11 @@ class TD3():
                         break
 
                 # --- reset/advance
+                obs = self.env.reset()[0]
                 eps_step_count = 0
-                eps += 1  
+                current_eps_reward = 0
+                eps += 1
+                done = False  
             
 
             # --- sample mini batch to train online critics
@@ -577,5 +607,7 @@ class TD3():
 
         print(msg)
         print(f'Best model episode {self.best_model_eps}')
+        
+        self.plot_reward_hist(self.ins_reward_hist)
         self.plot_reward_hist(self.reward_hist)
          
