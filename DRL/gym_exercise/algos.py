@@ -474,7 +474,8 @@ class TD3():
         current_eps_reward = 0
 
         pass_count = 0
-        best_eval_reward = self.pass_score-1.5
+        best_eval_reward = self.pass_score - 2
+        self.eval_pass_score = best_eval_reward
         best_coeffvar = self.coeff_var_limit
 
 
@@ -509,7 +510,7 @@ class TD3():
                     
 
                     # TODO - time the evaluation process
-                    eval_reward, eval_stdev = self.eval_policy(self.env_val, 10, verbose = False)
+                    eval_reward, eval_stdev = self.eval_policy(self.env_val, 20, verbose = False)
                     coeff_var = np.abs(eval_stdev / eval_reward)
                     
                     if verbose: print(f"Good training at episode {eps:4d} with reward of {self.reward_hist[eps]:3.3f}. Evaluation results μ={eval_reward:6.3f}, σ={eval_stdev:6.3f}, CV={coeff_var:6.3f}")
@@ -528,7 +529,7 @@ class TD3():
                     #     pass_count = 0
 
                     # if (eval_reward  >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
-                    if (eval_reward >= self.pass_score) and (coeff_var <= self.coeff_var_limit):
+                    if (eval_reward >= self.eval_pass_score) and (coeff_var <= self.coeff_var_limit):
                         pass_count += 1
 
                         # if coeff_var <= best_coeffvar:
