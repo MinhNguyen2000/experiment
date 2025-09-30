@@ -87,22 +87,22 @@ class TD3():
             model_name,
             model_registry,
             env: gym.Env,
-            alpha1: float,      # lr of critic 1 
-            alpha2: float,      # lr of critic 2
-            beta: float,        # lr of actor
-            gamma: float,       # reward discount factor
-            tau_c: float,       # Polyak coeff to update target critics
-            tau_a: float,       # Polyak coeff to update target actor
-            sigma: float,       # standard dev of Gaussian noise added to action
-            clip: float,        # noise clipping for policy smoothing
-            buffer_size: int,   # total number of samples in the training buffer
-            buffer_init: int,   # number of prefilled samples before training
-            batch_size: int,    # number of samples used in each current critic update
-            update_f: int,      # update frequency of online actor + offline target networks
-            update_step: int,   # number of gradient descent steps/updates of the policy & target networks
-            iter: int,          # number of training iterations
-            train_crit = dict(pass_limit=5, pass_score=975, coeff_var_limit=0.1),
-            result_folder: str = 'invpend_TD3_results',
+            alpha1:         float = 5e-3,       # lr of critic 1 
+            alpha2:         float = 5e-3,       # lr of critic 2
+            beta:           float = 5e-3,       # lr of actor
+            gamma:          float = 0.99,       # reward discount factor
+            tau_c:          float = 5e-3,              # Polyak coeff to update target critics
+            tau_a:          float = 5e-3,              # Polyak coeff to update target actor
+            sigma:          float = 0.1,              # standard dev of Gaussian noise added to action
+            clip:           float = 0.2,               # noise clipping for policy smoothing
+            buffer_size:    int   = 1e6,   # total number of samples in the training buffer
+            buffer_init:    int   = 1e4,   # number of prefilled samples before training
+            batch_size:     int   = 256,    # number of samples used in each current critic update
+            update_f:       int   = 2,      # update frequency of online actor + offline target networks
+            update_step:    int   = 1,   # number of gradient descent steps/updates of the policy & target networks
+            iter:           int   = 5e4,          # number of training iterations
+            train_crit =    dict(pass_limit=5, pass_score=975, coeff_var_limit=0.1),
+            result_folder:  str = 'invpend_TD3_results',
 
             seed: int = 42,
             cuda_enabled: bool = False
@@ -123,6 +123,8 @@ class TD3():
         self.pass_score = train_crit['pass_score']
         self.coeff_var_limit = train_crit['coeff_var_limit']
         self.result_folder = result_folder
+
+        self.avg_window_size = 25
 
         self.seed = seed
         self.cuda_enabled = cuda_enabled
@@ -186,20 +188,33 @@ class TD3():
     def to_batch(self,xs):
         return torch.as_tensor(np.asarray(xs), dtype=torch.float32, device=self.device)
     
-    def EMA_filter(self, reward: list, alpha):
+    def EMA_filter(self, reward_history: list, alpha):
         ''' Function that runs an exponential moving average filter along a datastream '''
-        output = np.zeros(len(reward)+1)
-        output[0] = reward[0]
-        for idx, item in enumerate(reward):
+        output = np.zeros(len(reward_history)+1)
+        output[0] = reward_history[0]
+        for idx, item in enumerate(reward_history):
             output[idx+1] = (1 - alpha) * output[idx] + alpha * item
         
         return output
 
+    def MA_filter(self, reward_history: list, window_size: int = 100):
+        if not reward_history or window_size <=0:
+            return []
+        
+        avg_reward = []
+        for i in range(window_size-1, len(reward_history) + 1):
+            window = reward_history[i - (window_size+1):i]
+            avg = sum(window) / window_size
+            avg_reward.append(avg)
+        
+        return avg_reward
+        
     def plot_reward_hist(self, history, alpha = 0.1):
         ''' Function that plots the reward and filtered reward per episode, then saves the plot in a specified save directory'''
         n_episodes= len(history)
         episodes = range(n_episodes)
-        filtered_reward_hist = self.EMA_filter(history, alpha)
+        # filtered_reward_hist = self.EMA_filter(history, alpha)
+        MA_filtered_reward_hist = self.MA_filter(history, window_size=self.avg_window_size)
 
         device_info = str(self.device) + "_"
         lr_args = fr"{self.model_id} | $\alpha_1$={self.alpha1} | $\alpha_2$={self.alpha2} | $\beta$={self.beta} | $\gamma$={self.gamma} | "
@@ -210,7 +225,7 @@ class TD3():
 
         plt.figure(figsize=(20,6))
         plt.plot(episodes, history[:n_episodes], color = "blue")
-        plt.plot(episodes, filtered_reward_hist[:n_episodes], color = "red")
+        plt.plot(range(self.avg_window_size-1,n_episodes+1), MA_filtered_reward_hist, color = "red")
         # plt.title(f'Total reward per episode - {self.hyperparam_config}')
         plt.xlabel('Episode')
         plt.ylabel('Reward')
@@ -613,6 +628,6 @@ class TD3():
         print(msg)
         print(f'Best model episode {self.best_model_eps}')
         
-        self.plot_reward_hist(self.ins_reward_hist)
+        # self.plot_reward_hist(self.ins_reward_hist)
         self.plot_reward_hist(self.reward_hist)
          
