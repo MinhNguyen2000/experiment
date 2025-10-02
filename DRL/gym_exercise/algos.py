@@ -124,7 +124,7 @@ class TD3():
         self.coeff_var_limit = train_crit['coeff_var_limit']
         self.result_folder = result_folder
 
-        self.avg_window_size = 25
+        self.avg_window_size = 10
 
         self.seed = seed
         self.cuda_enabled = cuda_enabled
@@ -202,11 +202,18 @@ class TD3():
             return []
         
         avg_reward = []
-        for i in range(window_size-1, len(reward_history) + 1):
-            window = reward_history[i - (window_size+1):i]
-            avg = sum(window) / window_size
-            avg_reward.append(avg)
+        average_window = deque(maxlen=window_size)
+        # for i in range(window_size-1, len(reward_history) + 1):
+        #     window = reward_history[i - (window_size-1):i]
+        #     avg = sum(window) / window_size
+        #     avg_reward.append(avg)
         
+        for idx, reward in enumerate(reward_history):
+            average_window.append(reward)
+
+            if idx >= window_size-1:
+                average = sum(average_window)/window_size
+                avg_reward.append(average)
         return avg_reward
         
     def plot_reward_hist(self, history, alpha = 0.1):
@@ -225,7 +232,7 @@ class TD3():
 
         plt.figure(figsize=(20,6))
         plt.plot(episodes, history[:n_episodes], color = "blue")
-        plt.plot(range(self.avg_window_size-1,n_episodes+1), MA_filtered_reward_hist, color = "red")
+        plt.plot(range(self.avg_window_size-1,n_episodes), MA_filtered_reward_hist, color = "red")
         # plt.title(f'Total reward per episode - {self.hyperparam_config}')
         plt.xlabel('Episode')
         plt.ylabel('Reward')
