@@ -1,6 +1,14 @@
 # DRL experiment
 This set of experiments explores the fundamental concepts in RL and DRL, as well as their applications in various simulated environments. Throughout the making this repo, I learned the theory of RL and DRL from the [RL Course by David Silver](https://www.youtube.com/watch?v=2pWv7GOvuf0&list=PLqYmG7hTraZDM-OYHWgPebj2MfCFzFObQ&index=1) and Sutton & Barto's RL book ([Reinforcement Learning: An Introduction, 2018](https://www.andrew.cmu.edu/course/10-703/textbook/BartoSutton.pdf))
 
+## Demos
+Demo video                                                                          | Plot of state and reward
+:----------------------------------------------------------------------------------:|:-------------------------:
+Inverted pendulum with added intial noise $\epsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invpen_TD3)   |   <img src="./assets/invpend_TD3_action.svg" width="960"><img src="./assets/invpend_TD3_states.svg" width="960">
+Inverted double pendulum with added intial noise $\epsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invdoublepen_TD3) |  <img src="./assets/invdoublepend_TD3_action.svg" width="960"><img src="./assets/invdoublepend_TD3_states.svg" width="960">
+a | b
+
+
 ## Project Structure
 The structure is listed in the order of development to represent my roadmap for learning RL and DRL 
 ```txt
