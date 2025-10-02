@@ -2,11 +2,12 @@
 This set of experiments explores the fundamental concepts in RL and DRL, as well as their applications in various simulated environments. Throughout the making this repo, I learned the theory of RL and DRL from the [RL Course by David Silver](https://www.youtube.com/watch?v=2pWv7GOvuf0&list=PLqYmG7hTraZDM-OYHWgPebj2MfCFzFObQ&index=1) and Sutton & Barto's RL book ([Reinforcement Learning: An Introduction, 2018](https://www.andrew.cmu.edu/course/10-703/textbook/BartoSutton.pdf))
 
 ## Demos
-Demo video                                                                          | Plot of state and reward
-:----------------------------------------------------------------------------------:|:-------------------------:
-Inverted pendulum with added intial noise $\epsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invpen_TD3)   |   <img src="./assets/invpend_TD3_action.svg" width="960"><img src="./assets/invpend_TD3_states.svg" width="960">
-Inverted double pendulum with added intial noise $\epsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invdoublepen_TD3) |  <img src="./assets/invdoublepend_TD3_action.svg" width="960"><img src="./assets/invdoublepend_TD3_states.svg" width="960">
-a | b
+Demo video                                                                          | Plot of states, action, and reward
+:-----------------------------------------------------------------------------------|:-------------------------
+Inverted pendulum using custom TD3 with added initial noise $\varepsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![Inverted Pendulum Demo Video](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invpen_TD3)   |   Plot of the cart action with injected noise in the first 50 steps <img src="./assets/invpen_TD3_action.svg" width="960"> <br><br> Plot of the pendulum states (cart position in blue, and pendulum angle in yellow) <img src="./assets/invpen_TD3_states.svg" width="960">
+Inverted double pendulum using custom TD3 with added initial noise $\varepsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![Double Inverted Pendulum Demo Video](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invddoublepend_TD3) |   Plot of the cart action with injected noise in the first 50 steps <img src="./assets/invdoublepend_TD3_action.svg" width="960"> <br><br> Plot of the pendulum states (cart position in blue, and pendulum angle in yellow and green) <img src="./assets/invdoublepend_TD3_states.svg" width="960">
+Swing-up inverted pendulum using custom TD3 ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/swingup_TD3) | Plot of the cart action <img src="./assets/swingup_TD3_action.svg" width="960"> <br><br> Plot of the pendulum states (cart position in blue, and pendulum angle in yellow) <img src="./assets/swingup_TD3_states.svg" width="960">
+Reacher using custom TD3 ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/reacher_TD3) | Plot of the actions across 5 episodes in the video <img src="./assets/reacher_TD3_action.svg" width="960"> <br><br> Plot of the reward achieved in each episode <img src="./assets/reacher_TD3_reward.svg" width="960">
 
 
 ## Project Structure
