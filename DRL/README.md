@@ -4,8 +4,9 @@ This set of experiments explores the fundamental concepts in RL and DRL, as well
 ## Demos
 Demo video                                                                          | Plot of state and reward
 :----------------------------------------------------------------------------------:|:-------------------------:
-![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invpen_TD3)   |  ![Description of Image](./assets/invpend_TD3_action)
-
+Inverted pendulum with added intial noise $\epsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invpen_TD3)   |   <img src="./assets/invpend_TD3_action.svg" width="960"><img src="./assets/invpend_TD3_states.svg" width="960">
+Inverted double pendulum with added intial noise $\epsilon \sim \mathbb{N}((0,1))$ in the first 50 time steps ![](https://github.com/MinhNguyen2000/experiment/blob/main/DRL/assets/invdoublepen_TD3) |  <img src="./assets/invdoublepend_TD3_action.svg" width="960"><img src="./assets/invdoublepend_TD3_states.svg" width="960">
+a | b
 
 
 ## Project Structure
