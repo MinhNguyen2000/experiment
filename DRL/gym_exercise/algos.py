@@ -176,6 +176,8 @@ class TD3():
         self.actor_target.eval()
 
         self.best_model_eps = 0
+        self.best_model_eval_rew = 0
+        self.best_model_eval_stdev = 0
 
     def init_weights(self, m):
         if isinstance(m, nn.Linear):
@@ -560,7 +562,9 @@ class TD3():
                             best_eval_reward = eval_reward
                             self.save_model()
                             self.best_model_eps = eps
-                            msg = f"Training terminated due to episode limit, best model saved at episode {self.best_model_eps:5d} with evaluate reward ({eval_reward:6.3f},{eval_stdev:6.3f})"
+                            self.best_model_eval_rew = eval_reward
+                            self.best_model_eval_stdev = eval_stdev
+                            msg = f"Training terminated due to episode limit, best model saved at episode {self.best_model_eps:5d} with evaluate reward ({self.best_model_eval_rew:6.3f},{self.best_model_eval_stdev:6.3f})"
                     else:
                         pass_count = 0
 
@@ -570,7 +574,7 @@ class TD3():
                         # self.save_model()
                         # self.best_model_eps = eps
                         # msg = f"done early at episode {self.best_model_eps:5d}, desired performance reached. \nBest model saved at episode {self.best_model_eps:5d} with evaluate reward ({eval_reward:6.3f},{eval_stdev:6.3f})"
-                        msg =f"Training done early at episode {eps:5d}. Best model saved at episode {self.best_model_eps:5d} with evaluate reward ({eval_reward:6.3f},{eval_stdev:6.3f})"
+                        msg =f"Training done early at episode {eps:5d}. Best model saved at episode {self.best_model_eps:5d} with evaluate reward ({self.best_model_eval_rew:6.3f},{self.best_model_eval_stdev:6.3f})"
                         break
 
                 # --- reset/advance
